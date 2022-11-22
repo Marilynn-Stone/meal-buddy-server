@@ -19,7 +19,7 @@ app.use(cors());
 app.use(morgan("dev"));
 
 app.get("/", (req, res) => {
-  res.json({ message: "Hello from server!" });
+  res.send("message: Hello from server!");
 });
 
 app.listen(PORT, () => {
