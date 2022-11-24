@@ -8,7 +8,7 @@ const cors = require("cors");
 const morgan = require("morgan");
 
 const bcrypt = require('bcryptjs');
-const salt = bcrypt.genSaltSync(10);
+// const salt = bcrypt.genSaltSync(10);
 
 
 // PG database client/connection setup
@@ -30,20 +30,19 @@ app.get("/", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
+  console.log(req.body);
   db.query(
     `SELECT * FROM users
       WHERE email = $1`, [req.body.email])
-      .then((response) => {
-        //console.log(response.rows);
-        // console.log('res.rows[0].password ', response.rows[0].password)
-        // console.log(bcrypt.hashSync(req.body.password, salt));
-        if (bcrypt.compareSync(req.body.password, response.rows[0].password)) {
-          res.send(response.rows[0]);
+      .then((dbres) => {
+        if (!dbres.rowCount) {
+          res.send("User does not exist. Please create a profile.");
+        } else if (bcrypt.compareSync(req.body.password, dbres.rows[0].password)) {
+            res.send(dbres.rows[0]);
         } else {
-          res.send("passwords do not match");
+            res.send("Passwords do not match, please try again");
         };
       }).catch((err) => console.log(err))
-  // res.send("received");
 })
 
 app.listen(PORT, () => {
