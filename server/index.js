@@ -7,10 +7,11 @@ const sassMiddleware = require("./lib/sass-middleware");
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
-const app = express();
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
-const cookieSession = require("cookie-session");
+const session = require("express-session");
+// const cookieSession = require("cookie-session");
+const app = express();
 
 // PG database client/connection setup
 const { Pool } = require("pg");
@@ -18,22 +19,34 @@ const dbParams = require("./lib/db.js");
 const db = new Pool(dbParams);
 db.connect();
 
+// Add cors options
 const corsOptions = {
   origin: ["http://localhost:3000"],
   exposedHeaders: "*",
   optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
+
 app.use(helmet());
 app.use(morgan("dev"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
 app.use(
-  cookieSession({
-    name: "session",
-    keys: ["fantasticMrFox"],
+  session({
+    secret: "process.env.session_secret",
+    resave: false,
+    saveUninitialized: false,
   })
 );
+
+// app.use(
+//   cookieSession({
+//     name: "session",
+//     keys: process.env.cookie_secret,
+//   })
+// );
+
 app.use(
   "/styles",
   sassMiddleware({
@@ -57,8 +70,6 @@ app.use("/api/users", userRoutes(db));
 app.use("/api/home", homeRoutes(db));
 
 // Home page
-// Warning: avoid creating more routes in this file!
-// Separate them into separate routes files (see above).
 
 app.get("/api", (req, res) => {
   res.send({ message: "Hello from server!" });

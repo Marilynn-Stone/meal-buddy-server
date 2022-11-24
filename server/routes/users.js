@@ -110,30 +110,29 @@ module.exports = (db) => {
   });
 
   router.post("/login", (req, res) => {
-    const customerCookie = req.session.customerCookie;
+    // const customerCookie = req.session.customerCookie;
     // res.render("index", { customerCookie });
     res.json({ message: "Hello from server!" });
-  });
 
-  // const email = req.body.email;
-  // const password = req.body.password;
-  // if (!email || !password) {
-  //   res.send("Error 400: username and password must contain values");
-  // }
-  // db.query(`SELECT * FROM customers WHERE email = $1;`, [email]).then(
-  //   (data) => {
-  //     if (data.rows.length === 0) {
-  //       res.send(
-  //         "403 - Customer not found. Please verify email and password are correct."
-  //       );
-  //     } else if (bcrypt.compareSync(password, data.rows[0].password)) {
-  //       req.session.customerCookie = data.rows[0];
-  //       res.redirect("/api/navigation/menu/appetizer");
-  //     } else {
-  //       res.send("403 - password does not match. Please try again.");
-  //     }
-  //   }
-  // );
+  const email = req.body.email;
+  const password = req.body.password;
+  if (!email || !password) {
+    res.send("Error 400: username and password must contain values");
+  }
+  db.query(`SELECT * FROM customers WHERE email = $1;`, [email]).then(
+    (data) => {
+      if (data.rows.length === 0) {
+        res.send(
+          "403 - Customer not found. Please verify email and password are correct."
+        );
+      } else if (bcrypt.compareSync(password, data.rows[0].password)) {
+        // req.session.customerCookie = data.rows[0];
+        res.redirect("/api/home");
+      } else {
+        res.send("403 - password does not match. Please try again.");
+      }
+    }
+  );
 
   return router;
 };
