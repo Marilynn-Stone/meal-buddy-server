@@ -13,7 +13,6 @@ const session = require("express-session");
 // const cookieSession = require("cookie-session");
 const app = express();
 
-
 // PG database client/connection setup
 const { Pool } = require("pg");
 const dbParams = require("./lib/db.js");
@@ -26,10 +25,10 @@ const corsOptions = {
   exposedHeaders: "*",
   optionsSuccessStatus: 200,
 };
-app.use(cors(corsOptions));
 
+app.use(cors(corsOptions));
 app.use(helmet());
-app.use(express.urlencoded({extended: true}));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors());
 app.use(morgan("dev"));
@@ -76,13 +75,14 @@ app.use("/api/home", homeRoutes(db));
 // Home page
 
 app.get("/api", (req, res) => {
-  res.send({ message: "Hello from server!" });
+  if (req.session.loggedIn) {
+    res.redirect("/api/home");
+  } else {
+    res.redirect("/api/users/login");
+    // res.sendFile("home.html", { root: path.join(__dirname, "public") });
+  }
+  // res.send({ message: "Hello from server!" });
 });
-
-app.post("/login", (req, res) => {
-  console.log(req.body);
-  res.send("received");
-})
 
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
