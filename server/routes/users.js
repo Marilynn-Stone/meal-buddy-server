@@ -3,7 +3,7 @@ consider all of this pseudo for now
 */
 
 const router = require("express").Router();
-// const bcrypt = require("bcryptjs");
+const bcrypt = require("bcryptjs");
 // const navigation = require("./navigation");
 require("dotenv").config();
 // const accountSid = process.env.TWILIO_ACCOUNT_SID;
@@ -104,35 +104,52 @@ module.exports = (db) => {
   // });
 
   router.get("/login", (req, res) => {
-    res.send({
-      token: "test123",
-    });
+    res.send(
+      '<form action="/login" method="post">' +
+        'Username: <input name="user"><br>' +
+        'Password: <input name="pass" type="password"><br>' +
+        '<input type="submit" text="Login"></form>'
+    );
   });
 
   router.post("/login", (req, res) => {
     // const customerCookie = req.session.customerCookie;
     // res.render("index", { customerCookie });
-    res.json({ message: "Hello from server!" });
+    // res.json({ message: "Hello from server!" });
 
-  const email = req.body.email;
-  const password = req.body.password;
-  if (!email || !password) {
-    res.send("Error 400: username and password must contain values");
-  }
-  db.query(`SELECT * FROM customers WHERE email = $1;`, [email]).then(
-    (data) => {
-      if (data.rows.length === 0) {
-        res.send(
-          "403 - Customer not found. Please verify email and password are correct."
-        );
-      } else if (bcrypt.compareSync(password, data.rows[0].password)) {
-        // req.session.customerCookie = data.rows[0];
-        res.redirect("/api/home");
-      } else {
-        res.send("403 - password does not match. Please try again.");
-      }
+    const email = req.body.email;
+    const password = req.body.password;
+    if (!email || !password) {
+      res.send("Please enter Username and Password!");
+      res.end();
     }
-  );
+
+    db.query(`SELECT * FROM users WHERE email = $1;`, [email]).then((data) => {
+      if (data.rows.length === 0) {
+        res.send("'Incorrect Username and/or Password!'");
+      } else if (bcrypt.compareSync(password, data.rows[0].password)) {
+        // regenerate the session, which is good practice to help
+        // guard against forms of session fixation
+        req.session.regenerate(function (err) {
+          if (err) next(err);
+        });
+
+        // store user information in session, typically a user id
+        req.session.user = req.body.user;
+
+        // save the session before redirection to ensure page
+        // load does not happen before session is saved
+        req.session.save(function (err) {
+          if (err) {
+            return next(err);
+          }
+          res.redirect("/");
+        });
+      } else {
+        res.send("Password does not match. Please try again.");
+      }
+    });
+  });
 
   return router;
 };
