@@ -7,6 +7,7 @@ const sassMiddleware = require("./lib/sass-middleware");
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
+const path = require("path");
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
 const session = require("express-session");
@@ -30,6 +31,7 @@ app.use(cors(corsOptions));
 app.use(helmet());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(express.static("public"));
 app.use(cors());
 app.use(morgan("dev"));
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -73,15 +75,15 @@ app.use("/api/users", userRoutes(db));
 app.use("/api/home", homeRoutes(db));
 
 // Home page
+app.get("/", (req, res) => {
+  // if (req.session.loggedIn) {
+  //   res.redirect("/api/home");
+  // } else {
+  //   res.redirect("/api/users/login");
 
-app.get("/api", (req, res) => {
-  if (req.session.loggedIn) {
-    res.redirect("/api/home");
-  } else {
-    res.redirect("/api/users/login");
-    // res.sendFile("home.html", { root: path.join(__dirname, "public") });
-  }
-  // res.send({ message: "Hello from server!" });
+  res.sendFile("index.html", {
+    root: path.join(__dirname, "../../meal-buddy-client/public"),
+  });
 });
 
 app.listen(PORT, () => {
