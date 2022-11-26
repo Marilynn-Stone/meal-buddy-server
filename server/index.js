@@ -7,7 +7,6 @@ const sassMiddleware = require("./lib/sass-middleware");
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
-const path = require("path");
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
 const session = require("express-session");
@@ -32,7 +31,6 @@ app.use(helmet());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static("public"));
-app.use(cors());
 app.use(morgan("dev"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -64,26 +62,25 @@ app.use(
 // Separated Routes for each Resource
 
 const userRoutes = require("./routes/users");
-const homeRoutes = require("./routes/home");
 // const navigationRoutes = require("./routes/navigation");
 // const menuRoutes = require("./routes/menu.js");
 
 // Mount all resource routes
 // app.use("/api/menu", menuRoutes(db));
 // app.use("/api/navigation", navigationRoutes(db));
-app.use("/api/users", userRoutes(db));
-app.use("/api/home", homeRoutes(db));
+app.use("/users", userRoutes(db));
 
 // Home page
 app.get("/", (req, res) => {
-  // if (req.session.loggedIn) {
-  //   res.redirect("/api/home");
-  // } else {
-  //   res.redirect("/api/users/login");
-
-  res.sendFile("index.html", {
-    root: path.join(__dirname, "../../meal-buddy-client/public"),
-  });
+  // If the user is loggedin
+  if (req.session.loggedin) {
+    // Output username
+    res.send("Welcome back, " + req.session.username + "!");
+  } else {
+    // Not logged in
+    res.send("Please login to create a menu!");
+  }
+  res.end();
 });
 
 app.listen(PORT, () => {

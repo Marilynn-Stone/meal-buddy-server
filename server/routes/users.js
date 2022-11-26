@@ -4,6 +4,7 @@ consider all of this pseudo for now
 
 const router = require("express").Router();
 const bcrypt = require("bcryptjs");
+
 // const navigation = require("./navigation");
 require("dotenv").config();
 // const accountSid = process.env.TWILIO_ACCOUNT_SID;
@@ -103,14 +104,7 @@ module.exports = (db) => {
   // });
   // });
 
-  router.get("/login", (req, res) => {
-    res.send(
-      '<form action="/login" method="post">' +
-        'Username: <input name="user"><br>' +
-        'Password: <input name="pass" type="password"><br>' +
-        '<input type="submit" text="Login"></form>'
-    );
-  });
+  router.get("/login", (req, res) => {});
 
   router.post("/login", (req, res) => {
     // const customerCookie = req.session.customerCookie;
