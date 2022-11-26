@@ -104,43 +104,27 @@ module.exports = (db) => {
   // });
   // });
 
-  router.get("/login", (req, res) => {});
+  router.get("/login", (req, res) => {
+    // const user = users[req.session.userID];
+    // const email = req.param.email;
+    // const password = req.params.password;
+  });
 
   router.post("/login", (req, res) => {
-    // const customerCookie = req.session.customerCookie;
-    // res.render("index", { customerCookie });
-    // res.json({ message: "Hello from server!" });
-
     const email = req.body.email;
     const password = req.body.password;
     if (!email || !password) {
-      res.send("Please enter Username and Password!");
-      res.end();
+      res.status(400).send("Please enter Username and Password!");
     }
 
     db.query(`SELECT * FROM users WHERE email = $1;`, [email]).then((data) => {
       if (data.rows.length === 0) {
-        res.send("'Incorrect Username and/or Password!'");
+        res.send("Incorrect Username and/or Password!");
       } else if (bcrypt.compareSync(password, data.rows[0].password)) {
-        // regenerate the session, which is good practice to help
-        // guard against forms of session fixation
-        req.session.regenerate(function (err) {
-          if (err) next(err);
-        });
-
-        // store user information in session, typically a user id
-        req.session.user = req.body.user;
-
-        // save the session before redirection to ensure page
-        // load does not happen before session is saved
-        req.session.save(function (err) {
-          if (err) {
-            return next(err);
-          }
-          res.redirect("/");
-        });
+        req.session.userID = data.rows[0].user_id;
+        res.json(data);
       } else {
-        res.send("Password does not match. Please try again.");
+        res.status(400).send("Password does not match. Please try again.");
       }
     });
   });

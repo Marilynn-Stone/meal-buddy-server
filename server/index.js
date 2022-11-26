@@ -8,9 +8,7 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
-const bodyParser = require("body-parser");
-const session = require("express-session");
-// const cookieSession = require("cookie-session");
+const cookieSession = require("cookie-session");
 const app = express();
 
 // PG database client/connection setup
@@ -30,25 +28,14 @@ app.use(cors(corsOptions));
 app.use(helmet());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static("public"));
 app.use(morgan("dev"));
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
 
 app.use(
-  session({
-    secret: "process.env.session_secret",
-    resave: false,
-    saveUninitialized: false,
+  cookieSession({
+    name: "session",
+    keys: [process.env.cookie_secret],
   })
 );
-
-// app.use(
-//   cookieSession({
-//     name: "session",
-//     keys: process.env.cookie_secret,
-//   })
-// );
 
 app.use(
   "/styles",
@@ -72,6 +59,8 @@ app.use("/users", userRoutes(db));
 
 // Home page
 app.get("/", (req, res) => {
+  // const customerCookie = req.session.customerCookie;
+  // res.render("index", { customerCookie });
   // If the user is loggedin
   if (req.session.loggedin) {
     // Output username
