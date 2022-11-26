@@ -3,7 +3,8 @@ consider all of this pseudo for now
 */
 
 const router = require("express").Router();
-// const bcrypt = require("bcryptjs");
+const bcrypt = require("bcryptjs");
+
 // const navigation = require("./navigation");
 require("dotenv").config();
 // const accountSid = process.env.TWILIO_ACCOUNT_SID;
@@ -104,35 +105,29 @@ module.exports = (db) => {
   // });
 
   router.get("/login", (req, res) => {
-    res.send({
-      token: "test123",
-    });
+    // const user = users[req.session.userID];
+    // const email = req.param.email;
+    // const password = req.params.password;
   });
 
   router.post("/login", (req, res) => {
-    // const customerCookie = req.session.customerCookie;
-    // res.render("index", { customerCookie });
-    res.json({ message: "Hello from server!" });
-
-  const email = req.body.email;
-  const password = req.body.password;
-  if (!email || !password) {
-    res.send("Error 400: username and password must contain values");
-  }
-  db.query(`SELECT * FROM customers WHERE email = $1;`, [email]).then(
-    (data) => {
-      if (data.rows.length === 0) {
-        res.send(
-          "403 - Customer not found. Please verify email and password are correct."
-        );
-      } else if (bcrypt.compareSync(password, data.rows[0].password)) {
-        // req.session.customerCookie = data.rows[0];
-        res.redirect("/api/home");
-      } else {
-        res.send("403 - password does not match. Please try again.");
-      }
+    const email = req.body.email;
+    const password = req.body.password;
+    if (!email || !password) {
+      res.status(400).send("Please enter Username and Password!");
     }
-  );
+
+    db.query(`SELECT * FROM users WHERE email = $1;`, [email]).then((data) => {
+      if (data.rows.length === 0) {
+        res.send("Incorrect Username and/or Password!");
+      } else if (bcrypt.compareSync(password, data.rows[0].password)) {
+        req.session.userID = data.rows[0].user_id;
+        res.json(data);
+      } else {
+        res.status(400).send("Password does not match. Please try again.");
+      }
+    });
+  });
 
   return router;
 };
