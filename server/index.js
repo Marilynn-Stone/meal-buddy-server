@@ -47,29 +47,17 @@ app.use(
 );
 
 // Separated Routes for each Resource
-
 const userRoutes = require("./routes/users");
-// const navigationRoutes = require("./routes/navigation");
-// const menuRoutes = require("./routes/menu.js");
+const navigationRoutes = require("./routes/navigation");
+const menuRoutes = require("./routes/menu.js");
 
 // Mount all resource routes
-// app.use("/api/menu", menuRoutes(db));
-// app.use("/api/navigation", navigationRoutes(db));
+app.use("/menu", menuRoutes(db));
+app.use("/navigation", navigationRoutes(db));
 app.use("/users", userRoutes(db));
 
-// Home page
 app.get("/", (req, res) => {
-  // const customerCookie = req.session.customerCookie;
-  // res.render("index", { customerCookie });
-  // If the user is loggedin
-  if (req.session.loggedin) {
-    // Output username
-    res.send("Welcome back, " + req.session.username + "!");
-  } else {
-    // Not logged in
-    res.send("Please login to create a menu!");
-  }
-  res.end();
+  res.redirect("http://localhost:3000");
 });
 
 app.listen(PORT, () => {

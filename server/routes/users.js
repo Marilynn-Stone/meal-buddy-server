@@ -5,7 +5,6 @@ consider all of this pseudo for now
 const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 
-// const navigation = require("./navigation");
 require("dotenv").config();
 // const accountSid = process.env.TWILIO_ACCOUNT_SID;
 // const authToken = process.env.TWILIO_AUTHTOKEN;
