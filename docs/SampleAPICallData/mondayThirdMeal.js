@@ -1,8 +1,8 @@
 // get recipe informaiton
 
-https://api.spoonacular.com/recipes/633167/information
+// https://api.spoonacular.com/recipes/633167/information
 
-{
+const mondayDinner = {
   "vegetarian": true,
   "vegan": false,
   "glutenFree": false,

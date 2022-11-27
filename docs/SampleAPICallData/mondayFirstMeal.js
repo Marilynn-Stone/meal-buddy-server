@@ -2,7 +2,7 @@
 
 // https://api.spoonacular.com/recipes/346591/information
 
-{
+const mondayBreakfast = {
     "vegetarian": true,
     "vegan": false,
     "glutenFree": false,
@@ -566,3 +566,8 @@
     ],
     "originalId": null
 }
+
+console.log(mondayBreakfast.id);
+console.log(mondayBreakfast.title);
+console.log(mondayBreakfast.image);
+
