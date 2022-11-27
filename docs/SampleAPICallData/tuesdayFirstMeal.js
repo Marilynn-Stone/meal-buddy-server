@@ -2,7 +2,7 @@
 
 // https://api.spoonacular.com/recipes/663867/information
 
-{
+const tuesdayBreakfast = {
   "vegetarian": true,
   "vegan": true,
   "glutenFree": true,

@@ -3,6 +3,9 @@ const router  = express.Router();
 
 module.exports = (db) => {
 
+  router.get("/menu", (req, res) => {
+    
+  });
 
   // if menu exists in DB, call DB
   // else call spoonacular API
