@@ -10,10 +10,10 @@ const createWeeklyMenuArray = function(weeklyDiet) {
   
   for (let day of weekDays) {
       for (let x = 0; x < 3; x ++) {
-          console.log(day);
-          console.log(meals[x]);
-          console.log(weeklyDiet.week[day].meals[x].title);
-          console.log(weeklyDiet.week[day].meals[x].sourceUrl);
+          // console.log(day);
+          // console.log(meals[x]);
+          // console.log(weeklyDiet.week[day].meals[x].title);
+          // console.log(weeklyDiet.week[day].meals[x].sourceUrl);
           let mealObject = {}
           mealObject.day = weekDays[day];
           mealObject.meal = meals[x];
@@ -30,6 +30,6 @@ const createWeeklyMenuArray = function(weeklyDiet) {
 
 
 
-console.log(createWeeklyMenuArray(weeklyDiet));
+// console.log(createWeeklyMenuArray(weeklyDiet));
 
 module.exports = createWeeklyMenuArray;
