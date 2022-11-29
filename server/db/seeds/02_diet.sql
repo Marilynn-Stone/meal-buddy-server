@@ -1,2 +1,2 @@
-INSERT INTO diet (user_id, caloric_target, dietary_category, gluten, lactose, peanut, fish, egg, shellsfish, tree_nuts, soy, sesame) VALUES
-(1, 2000, 'vegan', 'TRUE', 'TRUE', 'TRUE', 'TRUE', 'TRUE', 'TRUE', 'TRUE', 'TRUE', 'TRUE');
+-- INSERT INTO diet (user_id, caloric_target, dietary_category, gluten, lactose, peanut, fish, egg, shellsfish, tree_nuts, soy, sesame) VALUES
+-- (1, 2000, 'vegan', 'TRUE', 'TRUE', 'TRUE', 'TRUE', 'TRUE', 'TRUE', 'TRUE', 'TRUE', 'TRUE');
