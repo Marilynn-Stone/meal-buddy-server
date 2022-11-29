@@ -15,7 +15,7 @@ const app = express();
 const { Pool } = require("pg");
 const dbParams = require("./lib/db.js");
 const db = new Pool(dbParams);
-db.connect();
+db.connect(console.log("Database is connected"));
 
 // Add cors options
 const corsOptions = {
@@ -47,29 +47,22 @@ app.use(
 );
 
 // Separated Routes for each Resource
-
 const userRoutes = require("./routes/users");
-// const navigationRoutes = require("./routes/navigation");
-// const menuRoutes = require("./routes/menu.js");
+const navigationRoutes = require("./routes/navigation");
+const menuRoutes = require("./routes/menu.js");
 
 // Mount all resource routes
-// app.use("/api/menu", menuRoutes(db));
-// app.use("/api/navigation", navigationRoutes(db));
+app.use("/menu", menuRoutes(db));
+app.use("/navigation", navigationRoutes(db));
 app.use("/users", userRoutes(db));
 
-// Home page
 app.get("/", (req, res) => {
-  // const customerCookie = req.session.customerCookie;
-  // res.render("index", { customerCookie });
-  // If the user is loggedin
-  if (req.session.loggedin) {
-    // Output username
-    res.send("Welcome back, " + req.session.username + "!");
+  const user = req.session.userID;
+  if (user) {
+    res.send("Authorized user.");
   } else {
-    // Not logged in
-    res.send("Please login to create a menu!");
+    res.send("Please log in.");
   }
-  res.end();
 });
 
 app.listen(PORT, () => {
