@@ -1,3 +1,5 @@
+// see notes in mondayFirstMealObject.js
+
 const object = {
   id: 321752,
   mealName: "Creamy Fondue with Poached Egg and Baguette",

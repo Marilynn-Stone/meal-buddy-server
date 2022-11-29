@@ -1,3 +1,5 @@
+// see notes in mondayFirstMealObject.js
+
 const object = {
   id: 472111,
   mealName: "Coco-Nutty Granola from I Quit Sugar",

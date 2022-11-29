@@ -1,3 +1,5 @@
+// see notes in mondayFirstMealObject.js
+
 const object = {
   id: 633167,
   mealName: "Avocado Tomato & Mozzarella Panini/sandwiches",

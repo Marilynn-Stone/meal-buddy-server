@@ -1,3 +1,5 @@
+// see notes in mondayFirstMealObject.js
+
 const object = {
   id: 663867,
   mealName: "Tropical Steel Cut Oatmeal",
