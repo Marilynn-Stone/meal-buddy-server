@@ -516,3 +516,4 @@ const tuesdayLunch = {
   "originalId": null
 }
 
+module.exports = tuesdayLunch;

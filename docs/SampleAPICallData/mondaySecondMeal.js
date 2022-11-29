@@ -292,3 +292,5 @@ const mondayLunch = {
   ],
   "originalId": null
 }
+
+module.exports = mondayLunch;

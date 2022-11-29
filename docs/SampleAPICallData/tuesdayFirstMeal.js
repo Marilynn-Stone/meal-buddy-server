@@ -373,3 +373,5 @@ const tuesdayBreakfast = {
   "originalId": null,
   "spoonacularSourceUrl": "https://spoonacular.com/tropical-steel-cut-oatmeal-663867"
 }
+
+module.exports = tuesdayBreakfast;
