@@ -1,7 +1,12 @@
 const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 
+
 require("dotenv").config();
+
+  router.get("/menu", (req, res) => {
+    
+  });
 
 module.exports = (db) => {
   // if menu exists in DB, call DB

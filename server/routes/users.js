@@ -46,6 +46,7 @@ module.exports = (db) => {
   // accepts data and writes new user data to the DB. Checks if email address exists before adding new user.
   // when registration is accepted, places a customerCookie and auto-logs in the new user.
   // Hashes all passwords. (code heavily borrowed from previous projects)
+
   router.post("/signUp", (req, res) => {
     const hashedPassword = bcrypt.hashSync(req.body.password_input, 10);
     const first_name = req.body.first_name;
@@ -103,10 +104,7 @@ module.exports = (db) => {
   //   console.log(req.body);
   //   res.send("received");
 
-  // res.send({
-  //   token: "test123",
-  // });
-  // });
+
 
   router.get("/login", (req, res) => {
     res.send("GET login");
