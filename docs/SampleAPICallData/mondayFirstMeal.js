@@ -567,7 +567,9 @@ const mondayBreakfast = {
     "originalId": null
 }
 
-console.log(mondayBreakfast.id);
-console.log(mondayBreakfast.title);
-console.log(mondayBreakfast.image);
+module.exports = mondayBreakfast;
+
+// console.log(mondayBreakfast.id);
+// console.log(mondayBreakfast.title);
+// console.log(mondayBreakfast.image);
 

@@ -6,6 +6,5 @@ CREATE TABLE users (
   last_name VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL,
   password VARCHAR(255) NOT NULL,
-  cellphone_number VARCHAR(20),
-  menu_id INTEGER DEFAULT null
+  cellphone_number VARCHAR(20)
 );

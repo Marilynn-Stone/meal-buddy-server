@@ -271,3 +271,5 @@ const mondayDinner = {
   "originalId": null,
   "spoonacularSourceUrl": "https://spoonacular.com/avocado-tomato-mozzarella-panini-sandwiches-633167"
 }
+
+module.exports = mondayDinner;
