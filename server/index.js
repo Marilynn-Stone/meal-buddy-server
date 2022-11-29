@@ -15,7 +15,7 @@ const app = express();
 const { Pool } = require("pg");
 const dbParams = require("./lib/db.js");
 const db = new Pool(dbParams);
-db.connect();
+db.connect(console.log("Database is connected"));
 
 // Add cors options
 const corsOptions = {
@@ -57,7 +57,12 @@ app.use("/navigation", navigationRoutes(db));
 app.use("/users", userRoutes(db));
 
 app.get("/", (req, res) => {
-  res.redirect("http://localhost:3000");
+  const user = req.session.userID;
+  if (user) {
+    res.send("Authorized user.");
+  } else {
+    res.send("Please log in.");
+  }
 });
 
 app.listen(PORT, () => {

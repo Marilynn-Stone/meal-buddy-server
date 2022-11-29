@@ -46,51 +46,56 @@ module.exports = (db) => {
   // accepts data and writes new user data to the DB. Checks if email address exists before adding new user.
   // when registration is accepted, places a customerCookie and auto-logs in the new user.
   // Hashes all passwords. (code heavily borrowed from previous projects)
-  // router.post("/signup", (req, res) => {
-  //   const hashedPassword = bcrypt.hashSync(req.body.password_input, 10);
-  //   const first_name = req.body.first_name;
-  //   const last_name = req.body.last_name;
-  //   const email = req.body.email;
-  //   const cellphone_number = "+1" + req.body.cellphone_number;
-  //   const insertArray = [
-  //     first_name,
-  //     last_name,
-  //     email,
-  //     hashedPassword,
-  //     cellphone_number,
-  //   ];
-  //   if (
-  //     !first_name ||
-  //     !last_name ||
-  //     !email ||
-  //     !req.body.password_input ||
-  //     !cellphone_number
-  //   ) {
-  //     res.send(
-  //       "Error 400: All fields are mandatory. Please complete the form and resubmit."
-  //     );
-  //   }
-  //   db.query(`SELECT email FROM customers WHERE email = $1;`, [email]).then(
-  //     (data) => {
-  //       if (data.rows.length === 0) {
-  //         // console.log('no data.rows');
-  //         db.query(
-  //           `INSERT INTO users (first_name, last_name, email, password, cellphone_number) VALUES ($1, $2, $3, $4, $5) RETURNING *;`,
-  //           insertArray
-  //         )
-  //           .then((data) => {
-  //             req.session.customerCookie = data.rows[0];
-  //             res.redirect("/home?"); //**** need location of redirect */
-  //           })
-  //           .catch((err) => {
-  //             res.send(err.message);
-  //           });
-  //       } else {
-  //         res.send("user already exists, please login.");
-  //       }
-  //     }
-  //   );
-  // });
+  router.post("/signUp", (req, res) => {
+    const hashedPassword = bcrypt.hashSync(req.body.password_input, 10);
+    const first_name = req.body.first_name;
+    const last_name = req.body.last_name;
+    const email = req.body.email;
+    const cellphone_number = "+1" + req.body.cellphone_number;
+    const insertArray = [
+      first_name,
+      last_name,
+      email,
+      hashedPassword,
+      cellphone_number,
+    ];
+    if (
+      !first_name ||
+      !last_name ||
+      !email ||
+      !req.body.password_input ||
+      !cellphone_number
+    ) {
+      res
+        .status(403)
+        .send(
+          "All fields are mandatory. Please complete the form and resubmit."
+        );
+    }
+    db.query(`SELECT email FROM customers WHERE email = $1;`, [email]).then(
+      (data) => {
+        if (data.rows.length === 0) {
+          // console.log('no data.rows');
+          db.query(
+            `INSERT INTO users (first_name, last_name, email, password, cellphone_number) VALUES ($1, $2, $3, $4, $5) RETURNING *;`,
+            insertArray
+          )
+            .then((data) => {
+              req.session.customerCookie = data.rows[0];
+              res.redirect("/home?"); //**** need location of redirect */
+            })
+            .catch((err) => {
+              res.send(err.message);
+            });
+        } else {
+          res.send("User already exists, please login.");
+        }
+      }
+    );
+    users[id] = newUser;
+    res.cookie("userID", `${id}`);
+    res.json();
+  });
 
   // standard login. places customerCookie object with all relevent customer details.
   // router.post("/login", (req, res) => {
@@ -104,9 +109,7 @@ module.exports = (db) => {
   // });
 
   router.get("/login", (req, res) => {
-    // const user = users[req.session.userID];
-    // const email = req.param.email;
-    // const password = req.params.password;
+    res.send("GET login");
   });
 
   router.post("/login", (req, res) => {
@@ -115,17 +118,18 @@ module.exports = (db) => {
     if (!email || !password) {
       res.status(400).send("Please enter Username and Password!");
     }
-
-    db.query(`SELECT * FROM users WHERE email = $1;`, [email]).then((data) => {
-      if (data.rows.length === 0) {
-        res.send("Incorrect Username and/or Password!");
-      } else if (bcrypt.compareSync(password, data.rows[0].password)) {
-        req.session.userID = data.rows[0].user_id;
-        res.json(data);
-      } else {
-        res.status(400).send("Password does not match. Please try again.");
-      }
-    });
+    db.query(`SELECT * FROM users WHERE email = $1;`, [email])
+      .then((data) => {
+        console.log(data.rows[0]);
+        if (data.rows.length === 0) {
+          res.status(403).send("User does not exist. Please sign up.");
+        } else if (bcrypt.compareSync(password, data.rows[0].password)) {
+          req.session.userID = data.rows[0].user_id;
+          res.json(req.session.userID);
+        } else {
+          res.status(403).send("Incorrect Username and/or Password!");
+        }
+      });
   });
 
   return router;
