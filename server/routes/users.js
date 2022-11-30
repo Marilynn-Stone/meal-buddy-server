@@ -100,7 +100,7 @@ module.exports = (db) => {
 
   router.post("/signup", (req, res) => {
     const email = req.body.email;
-    const password = req.body.password;
+    const password = bcrypt.hashSync(req.body.password, 10);
     const first_name = req.body.firstName;
     const last_name = req.body.lastName;
     const phone_number = req.body.phoneNumber;
@@ -118,6 +118,14 @@ module.exports = (db) => {
     const sesame = req.body.sesame;
 
     console.log(req.body);
+    if (!first_name || !last_name || !email || !password || !phone_number) {
+      return res
+        .status(403)
+        .send(
+          "All fields are mandatory. Please complete the form and resubmit."
+        );
+    }
+
     return db
       .query(
         "INSERT INTO users (first_name, last_name, email, password, cellphone_number) VALUES ($1, $2, $3, $4, $5) RETURNING *;",
