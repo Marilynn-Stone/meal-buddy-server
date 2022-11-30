@@ -20,8 +20,9 @@ db.connect(console.log("Database is connected"));
 // Add cors options
 const corsOptions = {
   origin: ["http://localhost:3000"],
-  exposedHeaders: "*",
+  exposedHeaders: ["set-cookie"],
   optionsSuccessStatus: 200,
+  credentials: true
 };
 
 app.use(cors(corsOptions));
@@ -57,12 +58,7 @@ app.use("/navigation", navigationRoutes(db));
 app.use("/users", userRoutes(db));
 
 app.get("/", (req, res) => {
-  const user = req.session.userID;
-  if (user) {
-    res.send("Authorized user.");
-  } else {
-    res.send("Please log in.");
-  }
+  res.send("Hello From Server.");
 });
 
 app.listen(PORT, () => {

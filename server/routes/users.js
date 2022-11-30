@@ -48,18 +48,18 @@ module.exports = (db) => {
   // Hashes all passwords. (code heavily borrowed from previous projects)
 
   // router.post("/signUp", (req, res) => {
-  //   const hashedPassword = bcrypt.hashSync(req.body.password_input, 10);
-  //   const first_name = req.body.first_name;
-  //   const last_name = req.body.last_name;
-  //   const email = req.body.email;
-  //   const cellphone_number = "+1" + req.body.cellphone_number;
-  //   const insertArray = [
-  //     first_name,
-  //     last_name,
-  //     email,
-  //     hashedPassword,
-  //     cellphone_number,
-  //   ];
+  // const hashedPassword = bcrypt.hashSync(req.body.password_input, 10);
+  // const first_name = req.body.first_name;
+  // const last_name = req.body.last_name;
+  // const email = req.body.email;
+  // const cellphone_number = "+1" + req.body.cellphone_number;
+  // const insertArray = [
+  //   first_name,
+  //   last_name,
+  //   email,
+  //   hashedPassword,
+  //   cellphone_number,
+  // ];
   //   if (
   //     !first_name ||
   //     !last_name ||
@@ -148,15 +148,9 @@ module.exports = (db) => {
       });
   });
 
-  // standard login. places customerCookie object with all relevent customer details.
-  // router.post("/login", (req, res) => {
-  //   //From Paul
-  //   console.log(req.body);
-  //   res.send("received");
+  // router.get("/login", (req, res) => {
 
-  router.get("/login", (req, res) => {
-    res.send("GET login");
-  });
+  // });
 
   router.post("/login", (req, res) => {
     const email = req.body.email;
@@ -165,17 +159,19 @@ module.exports = (db) => {
       res.status(400).send("Please enter Username and Password!");
     }
     db.query(`SELECT * FROM users WHERE email = $1;`, [email]).then((data) => {
-      console.log(data.rows[0]);
+      console.log("login post data:", data.rows[0]);
       if (data.rows.length === 0) {
-        res.status(403).send("User does not exist. Please sign up.");
-      } else if (bcrypt.compareSync(password, data.rows[0].password)) {
-        req.session.userID = data.rows[0].user_id;
-        res.json(req.session.userID);
-      } else {
-        res.status(403).send("Incorrect Username and/or Password!");
+        res.status(400).send("User does not exist. Please sign up.");
       }
+      if (!(bcrypt.compareSync(password, data.rows[0].password))) {
+        res.status(400).send("Incorrect Username and/or Password!");
+      }
+      req.session.userID = data.rows[0].user_id;
+      console.log("req.session.userID:", data.rows[0].id);
+      res.status(200).send({ user: data.rows[0].id });
     });
   });
+
 
   return router;
 };
