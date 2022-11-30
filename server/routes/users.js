@@ -47,7 +47,7 @@ module.exports = (db) => {
   // when registration is accepted, places a customerCookie and auto-logs in the new user.
   // Hashes all passwords. (code heavily borrowed from previous projects)
 
-  // router.post("/signUp", (req, res) => {
+===============  // router.post("/signUp", (req, res) => {
   // const hashedPassword = bcrypt.hashSync(req.body.password_input, 10);
   // const first_name = req.body.first_name;
   // const last_name = req.body.last_name;
