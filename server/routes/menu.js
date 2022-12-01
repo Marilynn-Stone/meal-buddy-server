@@ -11,13 +11,17 @@ require("dotenv").config();
 module.exports = (db) => {
   // if menu exists in DB, call DB
   // else call spoonacular API
-  router.get("/menu/:meal", (req, res) => {
-    console.log(req.body);
-    db.query(`SELECT * FROM menu WHERE user_id = $1;`, [
-      req.params.user.id,
-    ]).then((data) => {
-      // res.send( "data.rows"?? );
-    });
+  router.get("/menu/getmeal", (req, res) => {
+    //? req.body.mealid?
+    axios.post(`https://api.spoonacular.com/recipes/${meal.id}/information?apiKey=efbb269880b24a5e8db3716408b96b6f`)
+    .then((response) => {
+     renderData = getRecipeRenderObject(response);
+    res.send(renderData);
+    }).catch((err) => {
+      console.log(err)
+    })
   });
+  
+  
   return router;
 };

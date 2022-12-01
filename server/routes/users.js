@@ -169,7 +169,7 @@ module.exports = (db) => {
       if (data.rows.length === 0) {
         res.status(403).send("User does not exist. Please sign up.");
       } else if (bcrypt.compareSync(password, data.rows[0].password)) {
-        req.session.userID = data.rows[0].user_id;
+        req.session.userID = data.rows[0].id;
         res.json(req.session.userID);
       } else {
         res.status(403).send("Incorrect Username and/or Password!");
