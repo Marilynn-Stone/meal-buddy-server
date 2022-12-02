@@ -47,58 +47,18 @@ module.exports = (db) => {
   // when registration is accepted, places a customerCookie and auto-logs in the new user.
   // Hashes all passwords. (code heavily borrowed from previous projects)
 
-  // router.post("/signUp", (req, res) => {
-  // const hashedPassword = bcrypt.hashSync(req.body.password_input, 10);
-  // const first_name = req.body.first_name;
-  // const last_name = req.body.last_name;
-  // const email = req.body.email;
-  // const cellphone_number = "+1" + req.body.cellphone_number;
-  // const insertArray = [
-  //   first_name,
-  //   last_name,
-  //   email,
-  //   hashedPassword,
-  //   cellphone_number,
-  // ];
-  //   if (
-  //     !first_name ||
-  //     !last_name ||
-  //     !email ||
-  //     !req.body.password_input ||
-  //     !cellphone_number
-  //   ) {
-  //     res
-  //       .status(403)
-  //       .send(
-  //         "All fields are mandatory. Please complete the form and resubmit."
-  //       );
-  //   }
-  //   db.query(`SELECT email FROM customers WHERE email = $1;`, [email]).then(
-  //     (data) => {
-  //       if (data.rows.length === 0) {
-  //         // console.log('no data.rows');
-  //         db.query(
-  //           `INSERT INTO users (first_name, last_name, email, password, cellphone_number) VALUES ($1, $2, $3, $4, $5) RETURNING *;`,
-  //           insertArray
-  //         )
-  //           .then((data) => {
-  //             req.session.customerCookie = data.rows[0];
-  //             res.redirect("/home?"); //**** need location of redirect */
-  //           })
-  //           .catch((err) => {
-  //             res.send(err.message);
-  //           });
-  //       } else {
-  //         res.send("User already exists, please login.");
-  //       }
-  //     }
-  //   );
-  //   users[id] = newUser;
-  //   res.cookie("userID", `${id}`);
-  //   res.json();
-  // });
-
   router.post("/signup", (req, res) => {
+    const getUserByEmail = (email) => {
+      return db
+        .query(`SELECT * FROM users WHERE email = $1`, [email])
+        .then((result) => {
+          console.log("RESULT.ROWS:", result.rows[0]);
+          return result.rows;
+        })
+
+        .catch((err) => console.log(err.message));
+    };
+
     const email = req.body.email;
     const password = bcrypt.hashSync(req.body.password, 10);
     const first_name = req.body.firstName;
@@ -117,43 +77,69 @@ module.exports = (db) => {
     const soy = req.body.soy;
     const sesame = req.body.sesame;
 
-    console.log(req.body);
-    if (!first_name || !last_name || !email || !password || !phone_number) {
-      return res
-        .status(403)
-        .send(
-          "All fields are mandatory. Please complete the form and resubmit."
-        );
+    function containsSpecialChars(str) {
+      const specialChars = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
+      return specialChars.test(str);
     }
 
-    return db
-      .query(
-        "INSERT INTO users (first_name, last_name, email, password, cellphone_number) VALUES ($1, $2, $3, $4, $5) RETURNING *;",
-        [first_name, last_name, email, password, phone_number]
-      )
-      .then((data) => {
-        const user_id = data.rows[0].id;
-        return db.query(
-          "INSERT INTO diet (user_id, caloric_target, dietary_category, gluten, lactose, peanut, fish, egg, shellfish, tree_nuts, soy, sesame) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);",
-          [
-            user_id,
-            caloricTarget,
-            dietCategory,
-            gluten,
-            lactose,
-            peanut,
-            fish,
-            egg,
-            shellfish,
-            tree_nuts,
-            soy,
-            sesame,
-          ]
+    console.log(req.body);
+    getUserByEmail(email).then((result) => {
+      const user = result[0];
+
+      if (user) {
+        return res
+          .status(403)
+          .send("An account with this email already exists");
+      } else if (
+        !first_name ||
+        !last_name ||
+        !email ||
+        !password ||
+        !phone_number
+      ) {
+        return res
+          .status(403)
+          .send(
+            "All fields are mandatory. Please complete the form and resubmit."
+          );
+      } else if (
+        req.body.password.length < 8 ||
+        !containsSpecialChars(req.body.password)
+      ) {
+        return res.send(
+          "please enter a password of 8 or more characters and include a special character"
         );
-      })
-      .then(() => {
-        res.send("success");
-      });
+      } else {
+        return db
+          .query(
+            "INSERT INTO users (first_name, last_name, email, password, cellphone_number) VALUES ($1, $2, $3, $4, $5) RETURNING *;",
+            [first_name, last_name, email, password, phone_number]
+          )
+          .then((data) => {
+            const user_id = data.rows[0].id;
+            return db.query(
+              "INSERT INTO diet (user_id, caloric_target, dietary_category, gluten, lactose, peanut, fish, egg, shellfish, tree_nuts, soy, sesame) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);",
+              [
+                user_id,
+                caloricTarget,
+                dietCategory,
+                gluten,
+                lactose,
+                peanut,
+                fish,
+                egg,
+                shellfish,
+                tree_nuts,
+                soy,
+                sesame,
+              ]
+            );
+          })
+          .then(() => {
+            return res.send("success");
+          });
+      }
+    });
   });
 
   // router.get("/login", (req, res) => {
@@ -171,7 +157,7 @@ module.exports = (db) => {
       if (data.rows.length === 0) {
         res.status(400).send("User does not exist. Please sign up.");
       }
-      if (!(bcrypt.compareSync(password, data.rows[0].password))) {
+      if (!bcrypt.compareSync(password, data.rows[0].password)) {
         res.status(400).send("Incorrect Username and/or Password!");
       }
       req.session.userID = data.rows[0].user_id;
@@ -179,7 +165,6 @@ module.exports = (db) => {
       res.status(200).send({ user: data.rows[0].id });
     });
   });
-
 
   return router;
 };
