@@ -1,23 +1,22 @@
 const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 
-
 require("dotenv").config();
 
-  router.get("/menu", (req, res) => {
-    
-  });
-
 module.exports = (db) => {
-  // if menu exists in DB, call DB
-  // else call spoonacular API
-  router.get("/menu/:meal", (req, res) => {
+
+  router.post("/weekly_menu", (req, res) => {
     console.log(req.body);
-    db.query(`SELECT * FROM menu WHERE user_id = $1;`, [
-      req.params.user.id,
-    ]).then((data) => {
-      // res.send( "data.rows"?? );
+    db.query(`SELECT spoonacular_id, title, day, category FROM meals JOIN menus ON menu_id = menus.id JOIN users ON menus.user_id = users.id WHERE users.id = $1;`, [req.body.user_id,])
+      .then((data) => {
+        if (data.rows !== []) {
+        res.send(data.rows);
+        }
+      }).catch((err) => {
+         console.log(err);
+      });
     });
-  });
+
   return router;
+
 };
