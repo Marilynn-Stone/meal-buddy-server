@@ -12,12 +12,19 @@ module.exports = (db) => {
       `SELECT spoonacular_id, day, category, title AS name FROM meals JOIN menus ON menu_id = menus.id JOIN users ON menus.user_id = users.id WHERE users.id = $1;`,
       [req.body.user_id]
     )
-      .then((data) => {
-        console.log(JSON.stringify(data.rows.reverse()));
-        if (data.rows !== []) {
-          res.send(data.rows);
-        }
-      })
+    .then((data) => {
+      console.log("database result: ", JSON.stringify(data.rows.reverse()));
+      if (data.rows !== []) {
+        res.send(data.rows);
+      } else {
+        db.query(
+          `INSERT INTO menus users.id = $1 RETURNING id;`, [req.body.user_id]
+        ).then((data) => {
+          console.log(data);
+          res.send(data);
+        })
+      }
+    })
       .catch((err) => {
         console.log(err);
       });

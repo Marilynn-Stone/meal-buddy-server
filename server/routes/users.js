@@ -118,7 +118,7 @@ module.exports = (db) => {
           .then((data) => {
             const user_id = data.rows[0].id;
             return db.query(
-              "INSERT INTO diet (user_id, caloric_target, dietary_category, gluten, lactose, peanut, fish, egg, shellfish, tree_nuts, soy, sesame) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);",
+              "INSERT INTO user_diets (user_id, caloric_target, dietary_category, gluten, lactose, peanut, fish, egg, shellfish, tree_nuts, soy, sesame) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);",
               [
                 user_id,
                 caloricTarget,
