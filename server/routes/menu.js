@@ -1,23 +1,37 @@
 const router = require("express").Router();
 const bcrypt = require("bcryptjs");
-
+const getRecipeRenderObject = require("../../helperFunctions/getRecipeRenderObject");
 
 require("dotenv").config();
 
-  router.get("/menu", (req, res) => {
-    
+module.exports = (db) => {
+
+  router.post("/weekly_menu", (req, res) => {
+    console.log(req.body);
+    db.query(
+      `SELECT spoonacular_id, day, category, title AS name FROM meals JOIN menus ON menu_id = menus.id JOIN users ON menus.user_id = users.id WHERE users.id = $1;`,
+      [req.body.user_id]
+    )
+      .then((data) => {
+        console.log(JSON.stringify(data.rows.reverse()));
+        if (data.rows !== []) {
+          res.send(data.rows);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   });
 
-module.exports = (db) => {
-  // if menu exists in DB, call DB
-  // else call spoonacular API
-  router.get("/menu/:meal", (req, res) => {
-    console.log(req.body);
-    db.query(`SELECT * FROM menu WHERE user_id = $1;`, [
-      req.params.user.id,
-    ]).then((data) => {
-      // res.send( "data.rows"?? );
-    });
-  });
+  // router.post("/meal/:id", (req, res) => {
+  //   console.log(req.params);
+  //   app.get(`https://api.spoonacular.com/recipes/${req.params.id}/information`)
+  //   }).then((data) => {
+  //     res.send(getRecipeRenderObject(data));
+  //   }).catch((err) => {
+  //     console.log(err);
+  //   });
+
   return router;
 };
+
