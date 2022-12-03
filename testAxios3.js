@@ -11,10 +11,10 @@ const headers = {
 }
 
 const data = {
-    "username": "KendallSmithYAY!",
-    "firstName": "Kendall",
-    "lastName": "Smith",
-    "email": "kendall@gmail.com"
+    "username": "trevorfunk",
+    "firstName": "Trevor",
+    "lastName": "Funk",
+    "email": "trevor@gmail.com"
   }
 
 axios.post(`https://api.spoonacular.com/users/connect`, data, headers)
