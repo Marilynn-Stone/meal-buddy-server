@@ -1,5 +1,4 @@
 const axios = require("axios");
-const { hash } = require("bcryptjs");
 
 const headers = { 
   headers: {
@@ -11,11 +10,11 @@ const headers = {
 }
 
 const data = {
-    "username": "trevorfunk",
-    "firstName": "Trevor",
-    "lastName": "Funk",
-    "email": "trevor@gmail.com"
-  }
+  "username": "trevorfunk",
+  "firstName": "Trevor",
+  "lastName": "Funk",
+  "email": "trevor@gmail.com"
+}
 
 axios.post(`https://api.spoonacular.com/users/connect`, data, headers)
   .then(data => {
@@ -33,7 +32,7 @@ axios.post(`https://api.spoonacular.com/users/connect`, data, headers)
         "hash": hash
       }
     }
-    axios.get(`https://api.spoonacular.com/mealplanner/generate?apiKey=efbb269880b24a5e8db3716408b96b6f&timeFrame=day`, {params, headers})
+    axios.get(`https://api.spoonacular.com/mealplanner/generate?apiKey=efbb269880b24a5e8db3716408b96b6f&timeFrame=week&targetCalories=2300&exclude=gluten, peanut`, {params, headers})
     .then(data => console.log(data.data))
     .catch(err=> console.log(err));
   })
