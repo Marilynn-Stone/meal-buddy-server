@@ -40,25 +40,13 @@ module.exports = (db) => {
   // accepts data and writes new user data to the DB. Checks if email address exists before adding new user.
   // when registration is accepted, places a customerCookie and auto-logs in the new user.
   // Hashes all passwords. (code heavily borrowed from previous projects)
-
-  router.post("/signup", (req, res) => {
-    const getUserByEmail = (email) => {
-      return db
-        .query(`SELECT * FROM users WHERE email = $1`, [email])
-        .then((result) => {
-          console.log("RESULT.ROWS:", result.rows[0]);
-          return result.rows;
-        })
-
-        .catch((err) => console.log(err.message));
-    };
-
+  router.post("/accountInfo", (req, res) => {
+    const userID = req.get("userID");
     const email = req.body.email;
     const password = bcrypt.hashSync(req.body.password, 10);
     const first_name = req.body.firstName;
     const last_name = req.body.lastName;
     const phone_number = req.body.phoneNumber;
-    const spoonacularRequirements = { first_name, last_name, email }
 
     const caloricTarget = req.body.caloricTarget;
     const dietCategory = req.body.dietCategory;
@@ -71,14 +59,113 @@ module.exports = (db) => {
     const tree_nuts = req.body.treeNuts;
     const soy = req.body.soy;
     const sesame = req.body.sesame;
+    console.log("CONSOLE LOGGING", req.body);
+    return db
+      .query(
+        `UPDATE users
+      SET
+      email = '${email}',
+      password = '${password}',
+      first_name = '${first_name}',
+      last_name = '${last_name}',
+      cellphone_number = '${phone_number}'
+       WHERE id = ${userID};`
+      )
+      .then(() => {
+        return db.query(
+          `UPDATE user_diets
+        set
+        caloric_target = '${caloricTarget}',
+        dietary_category = '${dietCategory}',
+        gluten = '${gluten}',
+        lactose = '${lactose}',
+        peanut = '${peanut}',
+        fish = '${fish}',
+        egg = '${egg}',
+        shellfish = '${shellfish}',
+        tree_nuts = '${tree_nuts}',
+        soy = '${soy}',
+        sesame = '${sesame}'
+        WHERE user_id = ${userID}`
+        );
+      });
+  });
 
+  //-----------------------------------------------------------------------------
+
+  router.get("/accountInfo", (req, res) => {
+    console.log("req.body", req.body);
+    const userID = req.get("userID");
+    return db
+      .query(
+        `SELECT * FROM users LEFT JOIN user_diets ON users.id = user_diets.user_id WHERE users.id = ${userID}`
+      )
+      .then((result) => {
+        console.log("result", result);
+        res.send(result.rows[0]);
+      });
+  });
+
+  router.get("/:userID", (req, res) => {
+    console.log("req.params", req.params);
+    const userID = req.params.userID;
+    return db
+      .query(`SELECT * FROM users WHERE id = ${userID}`)
+      .then((result) => {
+        console.log("result", result);
+        res.send(result.rows[0]);
+      });
+  });
+
+  //-----------------------------------------------------------------------------
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //
+  //-----------------------------------------------------------------------------
+  router.post("/signup", (req, res) => {
+    const email = req.body.email;
+    const password = bcrypt.hashSync(req.body.password, 10);
+    const first_name = req.body.firstName;
+    const last_name = req.body.lastName;
+    const phone_number = req.body.phoneNumber;
+
+    const caloricTarget = req.body.caloricTarget;
+    const dietCategory = req.body.dietCategory;
+    const gluten = req.body.gluten;
+    const lactose = req.body.lactose;
+    const peanut = req.body.peanut;
+    const fish = req.body.fish;
+    const egg = req.body.egg;
+    const shellfish = req.body.shellfish;
+    const tree_nuts = req.body.treeNuts;
+    const soy = req.body.soy;
+    const sesame = req.body.sesame;
+    //---------------------------------------------------------
+    const getUserByEmail = (email) => {
+      return db
+        .query(`SELECT * FROM users WHERE email = $1`, [email])
+        .then((result) => {
+          return result.rows;
+        })
+
+        .catch((err) => console.log(err.message));
+    };
+    //---------------------------------------------------------
     function containsSpecialChars(str) {
       const specialChars = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
       return specialChars.test(str);
     }
-
-    console.log(req.body);
+    //---------------------------------------------------------
+    // console.log(req.body);
     getUserByEmail(email).then((result) => {
+      console.log("THIS IS THE RESULT", result[0]);
       const user = result[0];
 
       if (user) {
@@ -105,34 +192,44 @@ module.exports = (db) => {
           "please enter a password of 8 or more characters and include a special character"
         );
       } else {
-        const headers = { 
+        const headers = {
           headers: {
             "x-api-key": process.env.SPOONACULARAPIKEY,
             "Accept-Encoding": "application/json",
             "Content-Type": "application/json",
-            "Accept": "application/json"
-          }
-        }
+            Accept: "application/json",
+          },
+        };
         const data = {
-          "username": first_name + last_name,
-          "firstName": first_name,
-          "lastName": last_name,
-          "email": email
-        }
-      
-        return axios.post(`https://api.spoonacular.com/users/connect`, data, headers)
-        .then((data) => {
-          console.log("spoonacular user response", data.data)
-          return data.data;
-        }).then((data) => {
-        return db
-          .query(
-            "INSERT INTO users (first_name, last_name, email, password, cellphone_number, spoonacular_username, spoonacular_hash) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;",
-            [first_name, last_name, email, password, phone_number, data.username, data.hash]
-          )
-        })
+          username: first_name + last_name,
+          firstName: first_name,
+          lastName: last_name,
+          email: email,
+        };
+
+        return axios
+          .post(`https://api.spoonacular.com/users/connect`, data, headers)
+          .then((data) => {
+            console.log("spoonacular user response", data.data);
+            return data.data;
+          })
+          .then((data) => {
+            return db.query(
+              "INSERT INTO users (first_name, last_name, email, password, cellphone_number, spoonacular_username, spoonacular_hash) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;",
+              [
+                first_name,
+                last_name,
+                email,
+                password,
+                phone_number,
+                data.username,
+                data.hash,
+              ]
+            );
+          })
           .then((data) => {
             const user_id = data.rows[0].id;
+            res.status(200).send({ user: data.rows[0].id });
             return db.query(
               "INSERT INTO user_diets (user_id, caloric_target, dietary_category, gluten, lactose, peanut, fish, egg, shellfish, tree_nuts, soy, sesame) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *;",
               [
@@ -150,11 +247,6 @@ module.exports = (db) => {
                 sesame,
               ]
             );
-          })
-          .then((data) => {
-            req.session.userID = data.rows[0].user_id;
-            console.log("req.session.userID:", data.rows[0].id);
-            res.status(200).send({ user: data.rows[0].id });
           });
       }
     });
