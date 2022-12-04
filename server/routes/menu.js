@@ -4,6 +4,7 @@ const getRecipeRenderObject = require("../../helperFunctions/getRecipeRenderObje
 const createWeeklyMenuArray = require("../../helperFunctions/getMenuRenderArray");
 // const insertMenuIntoDB = require("../../helperFunctions/insertMenuIntoDB")
 const axios = require("axios");
+const { accessSync } = require("fs");
 // const { getSpoonacularAccount, getMenu } = require("../../helperFunctions/apiCallFormatters");
 
 require("dotenv").config();
@@ -81,9 +82,17 @@ module.exports = (db) => {
 
 
   router.get("/meal/:id", (req, res) => {
-    axios.get(`https://api.spoonacular.com/recipes/${req.params.id}/information`)
-      .then((data) => {
-        res.send(getRecipeRenderObject(data))
+    const headers = {
+      "Accept-Encoding": "application/json",
+      "Content-Type": "application/json",
+      "Accept": "application/json"
+    }  
+    axios.get(`https://api.spoonacular.com/recipes/${req.params.id}/information?apiKey=${process.env.SPOONACULARAPIKEY}`, {headers})
+      .then(async(data) => {
+        console.log(data.data)
+        const recipe = await getRecipeRenderObject(data.data);
+        console.log("RECIPE:", recipe)
+        res.send(recipe);
       })
       .catch((err) => {
         console.log(err);
@@ -93,8 +102,3 @@ module.exports = (db) => {
   return router;
 
 };
-
-// db.query(
-//   `INSERT INTO menus (user_id) VALUES ('${req.body.user_id}') RETURNING id;`
-//   ).then((data) => {
-//     const menu_id = data;
