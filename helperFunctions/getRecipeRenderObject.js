@@ -14,11 +14,15 @@ const getRecipeRenderObject = function(mealAPIObjectResponse) {
   recipeRenderObject.servings = meal.servings;
   recipeRenderObject.imageURL = meal.image;
   recipeRenderObject.summaryDescription = meal.summary;
+  recipeRenderObject.ingredients={};
+  for (let x = 0; x < meal.extendedIngredients.length; x++) {
+    recipeRenderObject.ingredients[x+1] = meal.extendedIngredients[x].original;
+  }
   recipeRenderObject.steps = {};
   for (let x = 0; x < meal.analyzedInstructions[0].steps.length; x++) {
     recipeRenderObject.steps[x+1] = meal.analyzedInstructions[0].steps[x].step;
   }
-  // console.log(`object: ${JSON.stringify(recipeRenderObject)}`);
+  console.log(`object: ${JSON.stringify(recipeRenderObject)}`);
   return recipeRenderObject;
 }
 
