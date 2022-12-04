@@ -24,8 +24,9 @@ module.exports = (db) => {
       `SELECT meals.id, spoonacular_id, day, category as meal, title FROM meals JOIN menus ON menu_id = menus.id JOIN users ON menus.user_id = users.id WHERE users.id = $1;`,
       [req.body.user_id])
         .then((data) => {
+          console.log(data)
           if (data.rows.length !== 0) {
-            res.send(data.rows.reverse());
+            res.send(data.rows);
           } else {
               db.query(
               `SELECT * FROM users JOIN user_diets ON users.id = user_diets.user_id WHERE users.id = $1`, [req.body.user_id])
