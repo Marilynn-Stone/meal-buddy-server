@@ -14,7 +14,6 @@ module.exports = (db) => {
       `SELECT meals.id, spoonacular_id, day, category, title AS name FROM meals JOIN menus ON menu_id = menus.id JOIN users ON menus.user_id = users.id WHERE users.id = $1;`,
       [req.body.user_id])
         .then((data) => {
-          console.log("menu data BD:", data.rows);
           if (data.rows.length !== 0) {
             res.send(data.rows.reverse());
           } else {
@@ -50,14 +49,14 @@ module.exports = (db) => {
                     dietString = `&diet=${userDetails.dietary_category}`;
                   };
                 
-                  axios.get(`https://api.spoonacular.com/mealplanner/generate?x-api-key=${process.env.SPOONACULARAPIKEY}&timeFrame=week&targetCalories=${userDetails.caloric_target}${dietString}${restrictionsString}`, {params, headers})
+                  axios.get(`https://api.spoonacular.com/mealplanner/generate?apiKey=${process.env.SPOONACULARAPIKEY}&timeFrame=week&targetCalories=${userDetails.caloric_target}${dietString}${restrictionsString}`, {params, headers})
                   .then(data => { 
-                    console.log("RESPONSE IN FUNCTION: ", data.data)
+                    console.log(data.data)
                     // return (data.data)
                   })
                 })
                 .catch((err) => {
-                  console.log(err);
+                  console.log(err.data);
                 });
           };
         })
