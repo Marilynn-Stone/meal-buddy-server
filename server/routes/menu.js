@@ -1,6 +1,8 @@
 const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 const getRecipeRenderObject = require("../../helperFunctions/getRecipeRenderObject");
+const createWeeklyMenuArray = require("../../helperFunctions/getMenuRenderArray");
+// const insertMenuIntoDB = require("../../helperFunctions/insertMenuIntoDB")
 const axios = require("axios");
 // const { getSpoonacularAccount, getMenu } = require("../../helperFunctions/apiCallFormatters");
 
@@ -8,13 +10,19 @@ require("dotenv").config();
 
 module.exports = (db) => {
 
+  const insertMenuIntoDB = function(menu_id, menuArray) {
+    for (meal of menuArray) {
+      db.query(`INSERT INTO meals (menu_id, spoonacular_id, title, day, category) VALUES ($1, $2, $3, $4, $5);`, [menu_id, meal.spoonacular_id, meal.title, meal.day, meal.meal])
+    }
+    console.log('DB update complete')
+  };
+
   router.post("/weekly_menu", (req, res) => {
     console.log("user ID: ", req.body.user_id);
     db.query(
-      `SELECT meals.id, spoonacular_id, day, category, title AS name FROM meals JOIN menus ON menu_id = menus.id JOIN users ON menus.user_id = users.id WHERE users.id = $1;`,
+      `SELECT meals.id, spoonacular_id, day, category as meal, title FROM meals JOIN menus ON menu_id = menus.id JOIN users ON menus.user_id = users.id WHERE users.id = $1;`,
       [req.body.user_id])
         .then((data) => {
-          console.log("menu data BD:", data.rows);
           if (data.rows.length !== 0) {
             res.send(data.rows.reverse());
           } else {
@@ -50,14 +58,22 @@ module.exports = (db) => {
                     dietString = `&diet=${userDetails.dietary_category}`;
                   };
                 
-                  axios.get(`https://api.spoonacular.com/mealplanner/generate?x-api-key=${process.env.SPOONACULARAPIKEY}&timeFrame=week&targetCalories=${userDetails.caloric_target}${dietString}${restrictionsString}`, {params, headers})
-                  .then(data => { 
-                    console.log("RESPONSE IN FUNCTION: ", data.data)
-                    // return (data.data)
+                  axios.get(`https://api.spoonacular.com/mealplanner/generate?apiKey=${process.env.SPOONACULARAPIKEY}&timeFrame=week&targetCalories=${userDetails.caloric_target}${dietString}${restrictionsString}`, {params, headers})
+                  .then(async(data) => { 
+                    console.log(data.data.meals)
+                    return await createWeeklyMenuArray(data.data);
+                  }).then(async (menuArray) => {
+                    console.log("menuArray: ", menuArray);
+                    console.log("length: ", menuArray.length)
+                    console.log("user ID: ", req.body.user_id);
+                    const menuID = await db.query(`INSERT INTO menus (user_id) VALUES ($1) RETURNING id;`, [req.body.user_id]);
+                    console.log("menuID: ", menuID.rows[0].id); 
+                    insertMenuIntoDB(menuID.rows[0].id, menuArray)
+                    res.send(menuArray);
                   })
                 })
                 .catch((err) => {
-                  console.log(err);
+                  console.log(err.data);
                 });
           };
         })
@@ -75,6 +91,7 @@ module.exports = (db) => {
   });
 
   return router;
+
 };
 
 // db.query(
