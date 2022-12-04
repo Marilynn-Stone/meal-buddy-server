@@ -1,6 +1,3 @@
-const weeklyDiet = require("../docs/SampleAPICallData/weeklyPlanSample1")
-
-
 const createWeeklyMenuArray = function(weeklyDiet) {
 
   const weekDays = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
