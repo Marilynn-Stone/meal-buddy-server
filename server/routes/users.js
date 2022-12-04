@@ -3,7 +3,6 @@ const bcrypt = require("bcryptjs");
 const axios = require("axios");
 
 require("dotenv").config();
-const getSpoonacularAccount = require("../../helperFunctions/apiCallFormatters")
 
 module.exports = (db) => {
   // sends a text to a registered user when their order is complete.
@@ -135,7 +134,7 @@ module.exports = (db) => {
           .then((data) => {
             const user_id = data.rows[0].id;
             return db.query(
-              "INSERT INTO user_diets (user_id, caloric_target, dietary_category, gluten, lactose, peanut, fish, egg, shellfish, tree_nuts, soy, sesame) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);",
+              "INSERT INTO user_diets (user_id, caloric_target, dietary_category, gluten, lactose, peanut, fish, egg, shellfish, tree_nuts, soy, sesame) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *;",
               [
                 user_id,
                 caloricTarget,
@@ -152,8 +151,10 @@ module.exports = (db) => {
               ]
             );
           })
-          .then(() => {
-            return res.send("success");
+          .then((data) => {
+            req.session.userID = data.rows[0].user_id;
+            console.log("req.session.userID:", data.rows[0].id);
+            res.status(200).send({ user: data.rows[0].id });
           });
       }
     });
