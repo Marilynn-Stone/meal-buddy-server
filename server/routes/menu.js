@@ -1,6 +1,8 @@
 const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 const getRecipeRenderObject = require("../../helperFunctions/getRecipeRenderObject");
+const createWeeklyMenuArray = require("../../helperFunctions/getMenuRenderArray");
+const insertMenuIntoDB = require("../../helperFunctions/insertMenuIntoDB")
 const axios = require("axios");
 // const { getSpoonacularAccount, getMenu } = require("../../helperFunctions/apiCallFormatters");
 
@@ -50,9 +52,15 @@ module.exports = (db) => {
                   };
                 
                   axios.get(`https://api.spoonacular.com/mealplanner/generate?apiKey=${process.env.SPOONACULARAPIKEY}&timeFrame=week&targetCalories=${userDetails.caloric_target}${dietString}${restrictionsString}`, {params, headers})
-                  .then(data => { 
-                    console.log(data.data)
-                    // return (data.data)
+                  .then(async(data) => { 
+                    console.log(data.data.meals)
+                    return await createWeeklyMenuArray(data.data);
+                  }).then(async (menuArray) => {
+                    console.log("menuArray: ", menuArray);
+                    console.log("length: ", menuArray.length)
+                    // const menuID = await db.query(`INSERT INTO menus (user_id) VALUES $1 RETURNING id`, [req.body.user_id]);
+                    // insertMenuIntoDB(menuID, menuArray)
+                    res.send(menuArray);
                   })
                 })
                 .catch((err) => {
