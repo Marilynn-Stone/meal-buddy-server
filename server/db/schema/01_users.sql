@@ -6,5 +6,7 @@ CREATE TABLE users (
   last_name VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL,
   password VARCHAR(255) NOT NULL,
-  cellphone_number VARCHAR(20)
+  cellphone_number VARCHAR(20),
+  spoonacular_username VARCHAR(255) DEFAULT NULL,
+  spoonacular_hash VARCHAR(255) DEFAULT NULL
 );

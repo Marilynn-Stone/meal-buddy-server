@@ -15,6 +15,7 @@ const createWeeklyMenuArray = function(weeklyDiet) {
           // console.log(weeklyDiet.week[day].meals[x].title);
           // console.log(weeklyDiet.week[day].meals[x].sourceUrl);
           let mealObject = {}
+          mealObject.key = count
           mealObject.day = weekDays[day];
           mealObject.meal = meals[x];
           mealObject.title = weeklyDiet.week[day].meals[x].title;

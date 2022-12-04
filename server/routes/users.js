@@ -1,14 +1,8 @@
-/*
-consider all of this pseudo for now
-*/
-
 const router = require("express").Router();
 const bcrypt = require("bcryptjs");
+const axios = require("axios");
 
 require("dotenv").config();
-// const accountSid = process.env.TWILIO_ACCOUNT_SID;
-// const authToken = process.env.TWILIO_AUTHTOKEN;
-// const client = require("twilio")(accountSid, authToken);
 
 module.exports = (db) => {
   // sends a text to a registered user when their order is complete.
@@ -64,6 +58,7 @@ module.exports = (db) => {
     const first_name = req.body.firstName;
     const last_name = req.body.lastName;
     const phone_number = req.body.phoneNumber;
+    const spoonacularRequirements = { first_name, last_name, email }
 
     const caloricTarget = req.body.caloricTarget;
     const dietCategory = req.body.dietCategory;
@@ -110,15 +105,36 @@ module.exports = (db) => {
           "please enter a password of 8 or more characters and include a special character"
         );
       } else {
+        const headers = { 
+          headers: {
+            "x-api-key": process.env.SPOONACULARAPIKEY,
+            "Accept-Encoding": "application/json",
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          }
+        }
+        const data = {
+          "username": first_name + last_name,
+          "firstName": first_name,
+          "lastName": last_name,
+          "email": email
+        }
+      
+        return axios.post(`https://api.spoonacular.com/users/connect`, data, headers)
+        .then((data) => {
+          console.log("spoonacular user response", data.data)
+          return data.data;
+        }).then((data) => {
         return db
           .query(
-            "INSERT INTO users (first_name, last_name, email, password, cellphone_number) VALUES ($1, $2, $3, $4, $5) RETURNING *;",
-            [first_name, last_name, email, password, phone_number]
+            "INSERT INTO users (first_name, last_name, email, password, cellphone_number, spoonacular_username, spoonacular_hash) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;",
+            [first_name, last_name, email, password, phone_number, data.username, data.hash]
           )
+        })
           .then((data) => {
             const user_id = data.rows[0].id;
             return db.query(
-              "INSERT INTO diet (user_id, caloric_target, dietary_category, gluten, lactose, peanut, fish, egg, shellfish, tree_nuts, soy, sesame) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);",
+              "INSERT INTO user_diets (user_id, caloric_target, dietary_category, gluten, lactose, peanut, fish, egg, shellfish, tree_nuts, soy, sesame) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *;",
               [
                 user_id,
                 caloricTarget,
@@ -135,8 +151,10 @@ module.exports = (db) => {
               ]
             );
           })
-          .then(() => {
-            return res.send("success");
+          .then((data) => {
+            req.session.userID = data.rows[0].user_id;
+            console.log("req.session.userID:", data.rows[0].id);
+            res.status(200).send({ user: data.rows[0].id });
           });
       }
     });
