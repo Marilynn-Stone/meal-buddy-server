@@ -21,7 +21,7 @@ module.exports = (db) => {
   router.post("/accountInfo", (req, res) => {
     const userID = req.get("userID");
     const email = req.body.email;
-    const password = bcrypt.hashSync(req.body.password, 10);
+    // const password = bcrypt.hashSync(req.body.password, 10);
     const first_name = req.body.firstName;
     const last_name = req.body.lastName;
     const phone_number = req.body.phoneNumber;
@@ -43,15 +43,15 @@ module.exports = (db) => {
         `UPDATE users
       SET
       email = '${email}',
-      password = '${password}',
       first_name = '${first_name}',
       last_name = '${last_name}',
       cellphone_number = '${phone_number}'
        WHERE id = ${userID};`
       )
       .then(() => {
-        return db.query(
-          `UPDATE user_diets
+        return db
+          .query(
+            `UPDATE user_diets
         set
         caloric_target = '${caloricTarget}',
         dietary_category = '${dietCategory}',
@@ -64,8 +64,11 @@ module.exports = (db) => {
         tree_nuts = '${tree_nuts}',
         soy = '${soy}',
         sesame = '${sesame}'
-        WHERE user_id = ${userID}`
-        );
+        WHERE user_id = ${userID};`
+          )
+          .then(() => {
+            return db.query(`DELETE FROM menus WHERE user_id = ${userID};`);
+          });
       });
   });
 
