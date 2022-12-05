@@ -18,28 +18,6 @@ module.exports = (db) => {
   //   }
   // };
 
-  // psuedo code guess at DB query for 28 items in a full week menu
-  // const getMenu = function (userId) {
-  //   return db.query(
-  //     `SELECT id, meal_name, description, image FROM menu
-  //     WHERE user.id = $1
-  //     GROUP BY id, orders.id;`,
-  //     [userId]
-  //   );
-  // };
-
-  // psuedo code guess at DB query for single item complete details
-  // const getMeal = function (mealId) {
-  //   return db.query(
-  //     `SELECT id, meal_name, description, image, recipe?, cooking_directions?  FROM menus
-  //   WHERE id = $1;`,
-  //     [mealId]
-  //   );
-  // };
-
-  // accepts data and writes new user data to the DB. Checks if email address exists before adding new user.
-  // when registration is accepted, places a customerCookie and auto-logs in the new user.
-  // Hashes all passwords. (code heavily borrowed from previous projects)
   router.post("/accountInfo", (req, res) => {
     const userID = req.get("userID");
     const email = req.body.email;
@@ -117,18 +95,6 @@ module.exports = (db) => {
       });
   });
 
-  //-----------------------------------------------------------------------------
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-  //
-  //-----------------------------------------------------------------------------
   router.post("/signup", (req, res) => {
     const email = req.body.email;
     const password = bcrypt.hashSync(req.body.password, 10);
@@ -158,12 +124,12 @@ module.exports = (db) => {
         .catch((err) => console.log(err.message));
     };
     //---------------------------------------------------------
-    function containsSpecialChars(str) {
+    const containsSpecialChars = (str) => {
       const specialChars = /[`!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~]/;
       return specialChars.test(str);
-    }
+    };
     //---------------------------------------------------------
-    // console.log(req.body);
+
     getUserByEmail(email).then((result) => {
       console.log("THIS IS THE RESULT", result[0]);
       const user = result[0];
@@ -252,10 +218,6 @@ module.exports = (db) => {
     });
   });
 
-  // router.get("/login", (req, res) => {
-
-  // });
-
   router.post("/login", (req, res) => {
     const email = req.body.email;
     const password = req.body.password;
@@ -271,7 +233,6 @@ module.exports = (db) => {
         res.status(400).send("Incorrect Username and/or Password!");
       }
       req.session.userID = data.rows[0].user_id;
-      console.log("req.session.userID:", data.rows[0].id);
       res.status(200).send({ user: data.rows[0].id });
     });
   });
