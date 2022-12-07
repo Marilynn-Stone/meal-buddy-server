@@ -29,6 +29,8 @@ const createWeeklyMenuArray = function(weeklyDiet) {
       }
   }
 
+  // console.log("in array creator : ", mealRenderArray);
+
   return mealRenderArray;
 }
 
