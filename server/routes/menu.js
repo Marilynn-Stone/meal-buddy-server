@@ -2,9 +2,7 @@ const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 const getRecipeRenderObject = require("../../helperFunctions/getRecipeRenderObject");
 const createWeeklyMenuArray = require("../../helperFunctions/getMenuRenderArray");
-const insertMenuIntoDB = require("../../helperFunctions/insertMenuIntoDB")
 const axios = require("axios");
-// const { getSpoonacularAccount, getMenu } = require("../../helperFunctions/apiCallFormatters");
 
 require("dotenv").config();
 
@@ -138,6 +136,10 @@ module.exports = (db) => {
       })
   });
     
+  router.post("/textMessage", (req, res) => {
+    console.log(req.body);
+    // const userMessage = getRecipeTextMessage(req.body);
+  });
 
   router.get("/meal/:id", (req, res) => {
     const headers = {
@@ -154,6 +156,7 @@ module.exports = (db) => {
       })
       .catch((err) => {
         console.log(err);
+
       })
   });
 
