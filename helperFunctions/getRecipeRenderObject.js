@@ -18,13 +18,25 @@ const getRecipeRenderObject = function(mealAPIObjectResponse) {
   for (let x = 0; x < meal.extendedIngredients.length; x++) {
     recipeRenderObject.ingredients[x+1] = meal.extendedIngredients[x].original;
   }
+
   recipeRenderObject.steps = {};
   for (let x = 0; x < meal.analyzedInstructions[0].steps.length; x++) {
     recipeRenderObject.steps[x+1] = meal.analyzedInstructions[0].steps[x].step;
   }
+
+  recipeRenderObject.shoppingList = {};
+  for (let x = 0; x < meal.extendedIngredients.length; x++) {
+    recipeRenderObject.shoppingList[x+1] = meal.extendedIngredients[x].name;
+  }
+
+
   console.log(`object: ${JSON.stringify(recipeRenderObject)}`);
   return recipeRenderObject;
+
+
+
 }
+  
 
 // getRecipeRenderObject(tuesdayLunch); 
 
