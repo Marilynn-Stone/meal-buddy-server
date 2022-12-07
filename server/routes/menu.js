@@ -137,8 +137,8 @@ module.exports = (db) => {
   });
     
   router.post("/textMessage", (req, res) => {
-    console.log(req.body);
     // const userMessage = getRecipeTextMessage(req.body);
+    // console.log(userMessage);
   });
 
   router.get("/meal/:id", (req, res) => {
