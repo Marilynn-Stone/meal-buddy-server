@@ -2,9 +2,8 @@ const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 const getRecipeRenderObject = require("../../helperFunctions/getRecipeRenderObject");
 const createWeeklyMenuArray = require("../../helperFunctions/getMenuRenderArray");
-// const insertMenuIntoDB = require("../../helperFunctions/insertMenuIntoDB")
+const insertMenuIntoDB = require("../../helperFunctions/insertMenuIntoDB")
 const axios = require("axios");
-const { accessSync } = require("fs");
 // const { getSpoonacularAccount, getMenu } = require("../../helperFunctions/apiCallFormatters");
 
 require("dotenv").config();
@@ -12,8 +11,9 @@ require("dotenv").config();
 module.exports = (db) => {
 
   const insertMenuIntoDB = function(menu_id, menuArray) {
-    for (meal of menuArray) {
-      db.query(`INSERT INTO meals (menu_id, spoonacular_id, title, day, category) VALUES ($1, $2, $3, $4, $5);`, [menu_id, meal.spoonacular_id, meal.title, meal.day, meal.meal])
+    for (let meal of menuArray) {
+      // console.log(meal)
+      db.query(`INSERT INTO meals (menu_id, spoonacular_id, title, day, category, order_by) VALUES ($1, $2, $3, $4, $5, $6);`, [menu_id, meal.spoonacular_id, meal.title, meal.day, meal.meal, meal.id])
     }
     console.log('DB update complete')
   };
@@ -21,7 +21,7 @@ module.exports = (db) => {
   router.post("/weekly_menu", (req, res) => {
     console.log("user ID: ", req.body.user_id);
     db.query(
-      `SELECT meals.id, spoonacular_id, day, category as meal, title FROM meals JOIN menus ON menu_id = menus.id JOIN users ON menus.user_id = users.id WHERE users.id = $1;`,
+      `SELECT meals.id, spoonacular_id, day, category as meal, title, order_by FROM meals JOIN menus ON menu_id = menus.id JOIN users ON menus.user_id = users.id WHERE users.id = $1 ORDER BY order_by;`,
       [req.body.user_id])
         .then((data) => {
           console.log(data)
@@ -84,7 +84,7 @@ module.exports = (db) => {
   router.post("/replace_weekly_menu", (req, res) => {
     console.log("user ID: ", req.body.user_id);
     db.query(
-      `DELETE * FROM menus WHERE users.id = $1 RETURNING *;`, [req.body.user_id])
+      `DELETE FROM menus WHERE user_id = $1 RETURNING *;`, [req.body.user_id])
       .then((user) => {
       console.log("Deleted Menu Details: ", user.rows[0]);
       db.query(
@@ -121,12 +121,11 @@ module.exports = (db) => {
         
           axios.get(`https://api.spoonacular.com/mealplanner/generate?apiKey=${process.env.SPOONACULARAPIKEY}&timeFrame=week&targetCalories=${userDetails.caloric_target}${dietString}${restrictionsString}`, {params, headers})
           .then(async(data) => { 
-            console.log(data.data.meals)
             return await createWeeklyMenuArray(data.data);
           }).then(async (menuArray) => {
-            console.log("menuArray: ", menuArray);
-            console.log("length: ", menuArray.length)
-            console.log("user ID: ", req.body.user_id);
+            // console.log("about to send to DB for insert: ", menuArray);
+            // console.log("length: ", menuArray.length)
+            // console.log("user ID: ", req.body.user_id);
             const menuID = await db.query(`INSERT INTO menus (user_id) VALUES ($1) RETURNING id;`, [req.body.user_id]);
             console.log("menuID: ", menuID.rows[0].id); 
             insertMenuIntoDB(menuID.rows[0].id, menuArray)

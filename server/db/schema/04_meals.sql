@@ -6,5 +6,6 @@ CREATE TABLE meals (
   spoonacular_id INTEGER NOT NULL,
   title VARCHAR(255) NOT NULL,
   day VARCHAR(255) NOT NULL,
-  category VARCHAR(255) NOT NULL
+  category VARCHAR(255) NOT NULL,
+  order_by INTEGER
 );
