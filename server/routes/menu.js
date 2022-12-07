@@ -19,7 +19,7 @@ module.exports = (db) => {
   };
 
   router.post("/weekly_menu", (req, res) => {
-    console.log("user ID: ", req.body.user_id);
+    // console.log("user ID: ", req.body.user_id);
     db.query(
       `SELECT meals.id, spoonacular_id, day, category as meal, title, order_by FROM meals JOIN menus ON menu_id = menus.id JOIN users ON menus.user_id = users.id WHERE users.id = $1 ORDER BY order_by;`,
       [req.body.user_id])
