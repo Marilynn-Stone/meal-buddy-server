@@ -2,6 +2,10 @@ const router = require("express").Router();
 const bcrypt = require("bcryptjs");
 const getRecipeRenderObject = require("../../helperFunctions/getRecipeRenderObject");
 const createWeeklyMenuArray = require("../../helperFunctions/getMenuRenderArray");
+const getRecipeTextMessage = require("../../helperFunctions/getRecipeTextMessage");
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTHTOKEN;
+const client = require("twilio")(accountSid, authToken);
 const axios = require("axios");
 
 require("dotenv").config();
@@ -14,6 +18,16 @@ module.exports = (db) => {
       db.query(`INSERT INTO meals (menu_id, spoonacular_id, title, day, category, order_by) VALUES ($1, $2, $3, $4, $5, $6);`, [menu_id, meal.spoonacular_id, meal.title, meal.day, meal.meal, meal.id])
     }
     console.log('DB update complete')
+  };
+
+  const textMessage = function (message, number) {
+    client.messages
+      .create({
+        body: message,
+        from: "+16479055250",
+        to: number,
+      })
+      .then((message) => console.log(message.sid));
   };
 
   router.post("/weekly_menu", (req, res) => {
@@ -119,6 +133,8 @@ module.exports = (db) => {
         
           axios.get(`https://api.spoonacular.com/mealplanner/generate?apiKey=${process.env.SPOONACULARAPIKEY}&timeFrame=week&targetCalories=${userDetails.caloric_target}${dietString}${restrictionsString}`, {params, headers})
           .then(async(data) => { 
+            console.log(`https://api.spoonacular.com/mealplanner/generate?apiKey=${process.env.SPOONACULARAPIKEY}&timeFrame=week&targetCalories=${userDetails.caloric_target}${dietString}${restrictionsString}`, {headers})
+            console.log("___________________REPLACEMENT MENU___________________ ", data.data)
             return await createWeeklyMenuArray(data.data);
           }).then(async (menuArray) => {
             // console.log("about to send to DB for insert: ", menuArray);
@@ -137,8 +153,16 @@ module.exports = (db) => {
   });
     
   router.post("/textMessage", (req, res) => {
-    // const userMessage = getRecipeTextMessage(req.body);
-    // console.log(userMessage);
+    console.log(req.body);
+    const userMessage = getRecipeTextMessage(req.body);
+    db.query(`SELECT cellphone_number FROM users WHERE id = $1`, [
+      req.body.userId,
+    ]).then((data) => {
+      const number = data.rows[0].cellphone_number;
+      console.log(number, userMessage);
+      textMessage(userMessage, number);
+      res.send("message successfully sent!");
+    });
   });
 
   router.get("/meal/:id", (req, res) => {
@@ -149,6 +173,7 @@ module.exports = (db) => {
     }  
     axios.get(`https://api.spoonacular.com/recipes/${req.params.id}/information?apiKey=${process.env.SPOONACULARAPIKEY}`, {headers})
       .then(async(data) => {
+        console.log(`https://api.spoonacular.com/recipes/${req.params.id}/information?apiKey=${process.env.SPOONACULARAPIKEY}`, {headers})
         console.log(data.data)
         const recipe = await getRecipeRenderObject(data.data);
         console.log("RECIPE:", recipe)
